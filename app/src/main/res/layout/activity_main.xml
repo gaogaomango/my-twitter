@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/whiteback"
+        android:gravity="center"
+        android:layoutDirection="ltr"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/channelInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:background="@color/whitebackground"
+            android:layoutDirection="ltr"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="2dp"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
+                android:layout_marginTop="0dp"
+                android:gravity="center"
+                android:background="@color/customeblue"
+                android:orientation="horizontal"
+                android:paddingBottom="4dp"
+                android:paddingLeft="6dp"
+                android:paddingRight="5dp"
+                android:paddingTop="4dp">
+
+                <ImageView
+                    android:id="@+id/img_channel_icon"
+                    android:layout_width="80px"
+                    android:layout_height="80px"
+                    android:layout_alignBottom="@+id/txtFollower"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_weight="0"
+                    android:src="@drawable/ic_account_circle_black_24dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingTop="1dp">
+
+                    <TextView
+                        android:id="@+id/txtNameFollowers"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:background="@color/customeblue"
+                        android:gravity="right"
+                        android:paddingBottom="1dp"
+                        android:text="User name"
+                        android:textAlignment="gravity"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:textColor="@color/white"
+                        android:textSize="14dp" />
+
+                    <TextView
+                        android:id="@+id/txtFollower"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignEnd="@+id/txtNameFollowers"
+                        android:layout_alignRight="@+id/txtNameFollowers"
+                        android:layout_below="@+id/txtNameFollowers"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="@color/customeblue"
+                        android:gravity="right"
+                        android:paddingBottom="5dp"
+                        android:text="subscribers"
+                        android:textAlignment="gravity"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@color/white"
+                        android:textSize="8dp"
+
+                        />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnFollow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_weight="0"
+                    android:background="@drawable/barcolor"
+                    android:drawableRight="@drawable/add"
+                    android:paddingRight="5dp"
+                    android:text="Follow"
+                    android:textColor="#fdfffa"
+                    android:textSize="10dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/whitebackground">
+
+            <ListView
+                android:id="@+id/listTweets"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/whitebackground"
+                android:descendantFocusability="beforeDescendants"
+                android:divider="@color/whitebackground"
+                android:dividerHeight="9dp" />
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>
