@@ -9,6 +9,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 public class AbstractBaseActivity extends AppCompatActivity {
 
     private static final String TAG = AbstractBaseActivity.class.getSimpleName();
@@ -55,9 +58,13 @@ public class AbstractBaseActivity extends AppCompatActivity {
         boolean isSuccess = true;
         switch (requestCode) {
             case REQUEST_CODE_ASK_PERMISSIONS:
-                for(int i : grantResults) {
-                    if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                        isSuccess = false;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                    isSuccess = Arrays.stream(grantResults).noneMatch(i -> i != PackageManager.PERMISSION_GRANTED);
+                } else {
+                    for(int i : grantResults) {
+                        if (i != PackageManager.PERMISSION_GRANTED) {
+                            isSuccess = false;
+                        }
                     }
                 }
                 if (isSuccess) {
