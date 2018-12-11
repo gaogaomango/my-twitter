@@ -4,7 +4,9 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -12,17 +14,24 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,6 +43,8 @@ public class LoginActivity extends AbstractBaseActivity {
 
     private static final int RESULT_LOAD_IMAGE = 123;
 
+    @BindView(R.id.editUserName)
+    EditText mEditUserName;
     @BindView(R.id.imgUserIcon)
     ImageView mImgUserIcon;
 
@@ -178,6 +189,64 @@ public class LoginActivity extends AbstractBaseActivity {
         showProgressDialog();
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference sRef = storage.getReferenceFromUrl(BuildConfig.FIRE_STORAGE_URL);
+        final String imagePath = DateUtil.format(DateUtil.DATE_FORMAT_YYYMMDDHHMSS, DateUtil.now())
+                + mEditUserName.getText().toString()
+                + ".jpg";
+        StorageReference imageRef = sRef.child("images/" + imagePath);
+        mImgUserIcon.setDrawingCacheEnabled(true);
+        mImgUserIcon.buildDrawingCache();
 
+        BitmapDrawable drawable = (BitmapDrawable) mImgUserIcon.getDrawable();
+        Bitmap bitmap = drawable.getBitmap();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+        UploadTask uploadTask = imageRef.putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+            }
+        }).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @Override
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+
+                // Continue with the task to get the download URL
+                return imageRef.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+
+                if (task.isSuccessful()) {
+                    Uri downloadUri = task.getResult();
+                    String downloadUrl = downloadUri.getEncodedPath();
+                    String name = "";
+                    try {
+
+//                    name = java.net.URLEncoder.encode(mEditUserName.getText().toString(), StandardCharsets.UTF_8.name()))
+                        name = java.net.URLEncoder.encode(mEditUserName.getText().toString(), "UTF-8");
+                        downloadUrl = java.net.URLEncoder.encode(downloadUrl, "UTF-8");
+                        Log.e(TAG, "name: " + name);
+                        Log.e(TAG, "downloadUrl: " + downloadUrl);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    // Handle failures
+                    // ...
+                }
+                hideProgressDialog();
+            }
+        });
     }
 }
