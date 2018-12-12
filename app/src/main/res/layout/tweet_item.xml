@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:background="@color/whitebackground"
+    android:focusable="false"
+    android:focusableInTouchMode="false"
+    android:gravity="center"
+    android:layoutDirection="rtl"
+    android:orientation="vertical"
+    android:textAlignment="center">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_weight="1"
+        android:background="@drawable/background"
+        android:gravity="center"
+        android:layoutDirection="rtl"
+        android:orientation="vertical"
+        android:paddingBottom="1dp"
+        android:paddingRight="5dp"
+        android:paddingTop="2dp"
+        android:textAlignment="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:background="@drawable/background"
+            android:gravity="center"
+            android:layoutDirection="ltr"
+            android:orientation="vertical"
+            android:paddingBottom="1dp"
+            android:paddingLeft="3dp"
+            android:paddingRight="3dp"
+            android:paddingTop="1dp"
+            android:textAlignment="center">
+
+            <TextView
+                android:id="@+id/txtTweetDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:background="@color/white"
+                android:text="2018-12-11"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textSize="10dp" />
+
+            <TextView
+                android:id="@+id/txtUserName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:gravity="right"
+                android:paddingRight="3dp"
+                android:text="User Name"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#0894f8"
+                android:textSize="12dp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/picturePath"
+                android:layout_width="50px"
+                android:layout_height="50px"
+                android:layout_weight="0"
+                android:src="@drawable/ic_account_circle_black_24dp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtTweet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:fontFamily="sans-serif"
+            android:gravity="left"
+            android:paddingBottom="2dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:text="Lobe new twitter feathers, looking forwod for new addion feather."
+            android:textAlignment="?android:attr/textAppearanceLarge"
+            android:textColor="#040101"
+            android:textSize="18dp" />
+
+        <ImageView
+            android:id="@+id/tweetPicture"
+            android:layout_width="match_parent"
+            android:layout_height="100pt"
+            android:layout_marginBottom="1dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="0"
+            android:adjustViewBounds="true"
+            android:background="@drawable/background"
+            android:scaleType="fitXY"
+            android:src="@drawable/twitter" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/background"
+            android:layoutDirection="ltr"
+            android:orientation="horizontal"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="3dp"
+            android:paddingTop="3dp">
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:id="@+id/imgShare"
+                android:background="@drawable/ic_favorite_border_black_24dp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"></LinearLayout>
+
+    </LinearLayout>
+
+
+</LinearLayout>
