@@ -29,9 +29,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.google.gson.Gson;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.regex.Pattern;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,6 +47,10 @@ public class LoginActivity extends AbstractBaseActivity {
 
     @BindView(R.id.editUserName)
     EditText mEditUserName;
+    @BindView(R.id.editUserEmail)
+    EditText mEditUserEmail;
+    @BindView(R.id.editUserPassword)
+    EditText mEditUserPassword;
     @BindView(R.id.imgUserIcon)
     ImageView mImgUserIcon;
 
@@ -184,8 +190,28 @@ public class LoginActivity extends AbstractBaseActivity {
         }
     }
 
+    private boolean isValidInputText() {
+        if (TextUtils.isEmpty(mEditUserName.getText().toString())) {
+            return false;
+        }
+        if (TextUtils.isEmpty(mEditUserEmail.getText().toString())) {
+            return false;
+        }
+        if (TextUtils.isEmpty(mEditUserPassword.getText().toString())) {
+            return false;
+        }
+
+        return true;
+    }
+
     @OnClick(R.id.btnLogin)
     public void onClickLoginBtn() {
+        // TODO: validation;
+        if (!isValidInputText()) {
+            Toast.makeText(getApplicationContext(), "Please check your information.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         showProgressDialog();
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference sRef = storage.getReferenceFromUrl(BuildConfig.FIRE_STORAGE_URL);
@@ -241,12 +267,75 @@ public class LoginActivity extends AbstractBaseActivity {
                         e.printStackTrace();
                     }
 
+
+                    StringBuilder urlBuilder = new StringBuilder();
+                    urlBuilder.append(BuildConfig.HTTP_HOST);
+                    urlBuilder.append("register.php");
+                    urlBuilder.append("?first_name");
+                    urlBuilder.append(mEditUserName.getText().toString());
+                    urlBuilder.append("&email");
+                    urlBuilder.append(mEditUserEmail.getText().toString());
+                    urlBuilder.append("&password");
+                    urlBuilder.append(mEditUserPassword.getText().toString());
+                    urlBuilder.append("&picture_path");
+                    downloadUrl = Pattern.compile("^/").matcher(downloadUrl).find() ? downloadUrl : "/" + downloadUrl;
+                    urlBuilder.append(BuildConfig.HTTP_FIREBASE_HOST + downloadUrl);
+
+                    new HttpUtil(new HttpCallBackAction() {
+                        @Override
+                        public void onSuccess(Object object) {
+                            Gson gson = new Gson();
+                            LoginUserResponse res = gson.fromJson((String) object, LoginUserResponse.class);
+
+                            if (BaseResponse.SUCCESS.equalsIgnoreCase(res.getMsg())) {
+                                Toast.makeText(getApplicationContext(), res.getMsg(), Toast.LENGTH_LONG).show();
+                                StringBuilder urlBuilder = new StringBuilder();
+                                urlBuilder.append(BuildConfig.HTTP_HOST);
+                                urlBuilder.append("login.php");
+                                urlBuilder.append("?email");
+                                urlBuilder.append(mEditUserEmail.getText().toString());
+                                urlBuilder.append("&password");
+
+                                new HttpUtil(new HttpCallBackAction() {
+                                    @Override
+                                    public void onSuccess(Object object) {
+                                        Gson gson = new Gson();
+                                        LoginUserResponse res = gson.fromJson((String) object, LoginUserResponse.class);
+                                        if (BaseResponse.SUCCESS.equalsIgnoreCase(res.getMsg())) {
+                                            login(res);
+                                        } else {
+                                            Toast.makeText(getApplicationContext(), "login failed", Toast.LENGTH_LONG).show();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailed(Object object) {
+                                        hideProgressDialog();
+                                        Toast.makeText(getApplicationContext(), "login failed", Toast.LENGTH_LONG).show();
+                                    }
+                                }).equals(urlBuilder.toString());
+
+                            }
+
+                        }
+
+                        @Override
+                        public void onFailed(Object object) {
+                            hideProgressDialog();
+                            Toast.makeText(getApplicationContext(), "register failed", Toast.LENGTH_LONG).show();
+                        }
+                    }).execute(urlBuilder.toString());
                 } else {
-                    // Handle failures
-                    // ...
+                    hideProgressDialog();
+                    Toast.makeText(getApplicationContext(), "register failed", Toast.LENGTH_LONG).show();
                 }
-                hideProgressDialog();
             }
         });
+    }
+
+    private void login(LoginUserResponse response) {
+        AppDataManager.getInstance().saveStringData(this, Parameter.PREF_KEY_USER_ID, response.getInfo().getUser_id());
+        hideProgressDialog();
+        finish();
     }
 }

@@ -9,9 +9,9 @@
   // var_dump($result);
 
   if(!result) {
-    $output = "{ 'msg':'fail'}";
+    $output = "{ 'msg':'failed'}";
   } else {
-    $output = "{ 'msg': 'user is added'}";
+    $output = "{ 'msg': 'success'}";
   }
 
 print($output);

@@ -10,6 +10,9 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField 'String', 'FIRE_STORAGE_URL', project.firebase_firestorage_url
+        // TODO if you want to use another url in release or development, replace.
+        buildConfigField 'String', 'HTTP_HOST', project.local_url
+        buildConfigField 'String', 'HTTP_FIREBASE_HOST', project.firebase_host_url
     }
     buildTypes {
         release {
