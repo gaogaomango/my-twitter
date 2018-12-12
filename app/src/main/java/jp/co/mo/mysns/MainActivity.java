@@ -48,20 +48,13 @@ public class MainActivity extends AbstractBaseActivity {
                 null,
                 null,
                 null));
-        mTweetInfoList.add(new TweetInfo(null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null));
 
         // TODO: set the adapter
 
-//        AbstractTweetAdapter adapter = getAdapter(TweetAdapterType.TWEET_ADD, mTweetInfoList);
+        AbstractTweetAdapter adapter = getAdapter(TweetAdapterType.TWEET_ADD, mTweetInfoList);
 //        AbstractTweetAdapter adapter = getAdapter(TweetAdapterType.TWEET_LOADING, mTweetInfoList);
 //        AbstractTweetAdapter adapter = getAdapter(TweetAdapterType.OTHER, mTweetInfoList);
-        AbstractTweetAdapter adapter = getAdapter(TweetAdapterType.TWEET_NOT_EXISTS, mTweetInfoList);
+//        AbstractTweetAdapter adapter = getAdapter(TweetAdapterType.TWEET_NOT_EXISTS, mTweetInfoList);
         mListTweets.setAdapter(adapter);
 
     }
