@@ -5,10 +5,10 @@
 
   $query = "insert into tweets(user_id, tweet_text, tweet_picture) values ('". $_GET['user_id'] ."', '". $_GET['tweet_text'] ."', '". $_GET['tweet_picture'] ."');";
 
-  var_dump($query);
+  // var_dump($query);
 
   $result = mysqli_query($connect, $query);
-  var_dump($result);
+  // var_dump($result);
 
   if(!result) {
     $output = "{\"msg\":\"failed\"}";

@@ -33,7 +33,7 @@ create table following(
 describe following;
 
 create view user_tweets as
-  select tweets.tweet_id, tweets.tweet_text, tweets.tweet_picture, tweets.tweet_date, login.first_name, login.picture_path
+  select tweets.user_id, tweets.tweet_id, tweets.tweet_text, tweets.tweet_picture, tweets.tweet_date, login.first_name, login.picture_path
   from tweets
   inner join login
   on tweets.user_id = login.user_id;
