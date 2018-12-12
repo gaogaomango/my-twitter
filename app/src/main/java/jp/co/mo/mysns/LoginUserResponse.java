@@ -1,19 +1,21 @@
 package jp.co.mo.mysns;
 
+import java.util.List;
+
 public class LoginUserResponse extends BaseResponse {
 
-    private LoginUserInfoResponse info;
+    protected List<LoginUserInfoResponse> info;
 
-    public LoginUserResponse(String msg, LoginUserInfoResponse info) {
+    public LoginUserResponse(String msg, List<LoginUserInfoResponse> info) {
         super(msg);
         this.info = info;
     }
 
-    public LoginUserInfoResponse getInfo() {
+    public List<LoginUserInfoResponse> getInfo() {
         return info;
     }
 
-    public void setInfo(LoginUserInfoResponse info) {
+    public void setInfo(List<LoginUserInfoResponse> info) {
         this.info = info;
     }
 }

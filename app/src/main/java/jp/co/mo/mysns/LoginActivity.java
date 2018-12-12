@@ -206,6 +206,7 @@ public class LoginActivity extends AbstractBaseActivity {
 
     @OnClick(R.id.btnLogin)
     public void onClickLoginBtn() {
+        Log.d(TAG, "onClickLoginBtn");
         // TODO: validation;
         if (!isValidInputText()) {
             Toast.makeText(getApplicationContext(), "Please check your information.", Toast.LENGTH_LONG).show();
@@ -232,15 +233,17 @@ public class LoginActivity extends AbstractBaseActivity {
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-
+                Log.d(TAG, "UploadTask onFailure");
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Log.d(TAG, "UploadTask onSuccess");
             }
         }).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
             @Override
             public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                Log.d(TAG, "UploadTask continueWithTask then");
                 if (!task.isSuccessful()) {
                     throw task.getException();
                 }
@@ -251,6 +254,7 @@ public class LoginActivity extends AbstractBaseActivity {
         }).addOnCompleteListener(new OnCompleteListener<Uri>() {
             @Override
             public void onComplete(@NonNull Task<Uri> task) {
+                Log.d(TAG, "UploadTask continueWithTask onComplete");
 
                 if (task.isSuccessful()) {
                     Uri downloadUri = task.getResult();
@@ -271,41 +275,48 @@ public class LoginActivity extends AbstractBaseActivity {
                     StringBuilder urlBuilder = new StringBuilder();
                     urlBuilder.append(BuildConfig.HTTP_HOST);
                     urlBuilder.append("register.php");
-                    urlBuilder.append("?first_name");
+                    urlBuilder.append("?first_name=");
                     urlBuilder.append(mEditUserName.getText().toString());
-                    urlBuilder.append("&email");
+                    urlBuilder.append("&email=");
                     urlBuilder.append(mEditUserEmail.getText().toString());
-                    urlBuilder.append("&password");
+                    urlBuilder.append("&password=");
                     urlBuilder.append(mEditUserPassword.getText().toString());
-                    urlBuilder.append("&picture_path");
-                    downloadUrl = Pattern.compile("^/").matcher(downloadUrl).find() ? downloadUrl : "/" + downloadUrl;
+                    urlBuilder.append("&picture_path=");
+                    // encodesしたスラッシュが先頭かどうか。
+                    downloadUrl = Pattern.compile("^%2F").matcher(downloadUrl).find() ? downloadUrl : "%2F" + downloadUrl;
                     urlBuilder.append(BuildConfig.HTTP_FIREBASE_HOST + downloadUrl);
 
                     new HttpUtil(new HttpCallBackAction() {
                         @Override
                         public void onSuccess(Object object) {
+                            Log.d(TAG, "HttpUtil onSuccess register");
                             Gson gson = new Gson();
-                            LoginUserResponse res = gson.fromJson((String) object, LoginUserResponse.class);
+                            LoginUserResponse res = gson.fromJson((String)object, LoginUserResponse.class);
 
                             if (BaseResponse.SUCCESS.equalsIgnoreCase(res.getMsg())) {
+                                Log.d(TAG, "HttpUtil onSuccess BaseResponse.SUCCESS");
+
                                 Toast.makeText(getApplicationContext(), res.getMsg(), Toast.LENGTH_LONG).show();
                                 StringBuilder urlBuilder = new StringBuilder();
                                 urlBuilder.append(BuildConfig.HTTP_HOST);
                                 urlBuilder.append("login.php");
-                                urlBuilder.append("?email");
+                                urlBuilder.append("?email=");
                                 urlBuilder.append(mEditUserEmail.getText().toString());
-                                urlBuilder.append("&password");
+                                urlBuilder.append("&password=");
+                                urlBuilder.append(mEditUserPassword.getText().toString());
 
                                 new HttpUtil(new HttpCallBackAction() {
                                     @Override
                                     public void onSuccess(Object object) {
+                                        Log.d(TAG, "HttpUtil onSuccess login");
                                         Gson gson = new Gson();
                                         LoginUserResponse res = gson.fromJson((String) object, LoginUserResponse.class);
-                                        if (BaseResponse.SUCCESS.equalsIgnoreCase(res.getMsg())) {
+                                        if (BaseResponse.SUCCESS.equalsIgnoreCase(res.getMsg()) && res.getInfo().size() == 1) {
                                             login(res);
                                         } else {
                                             Toast.makeText(getApplicationContext(), "login failed", Toast.LENGTH_LONG).show();
                                         }
+                                        hideProgressDialog();
                                     }
 
                                     @Override
@@ -313,8 +324,11 @@ public class LoginActivity extends AbstractBaseActivity {
                                         hideProgressDialog();
                                         Toast.makeText(getApplicationContext(), "login failed", Toast.LENGTH_LONG).show();
                                     }
-                                }).equals(urlBuilder.toString());
+                                }).execute(urlBuilder.toString());
 
+                            } else {
+                                hideProgressDialog();
+                                Log.d(TAG, "HttpUtil onSuccess BaseResponse.FAILED");
                             }
 
                         }
@@ -334,8 +348,9 @@ public class LoginActivity extends AbstractBaseActivity {
     }
 
     private void login(LoginUserResponse response) {
-        AppDataManager.getInstance().saveStringData(this, Parameter.PREF_KEY_USER_ID, response.getInfo().getUser_id());
+        AppDataManager.getInstance().saveStringData(this, Parameter.PREF_KEY_USER_ID, response.getInfo().get(0).getUser_id());
         hideProgressDialog();
+        Toast.makeText(getApplicationContext(), "login success", Toast.LENGTH_LONG).show();
         finish();
     }
 }

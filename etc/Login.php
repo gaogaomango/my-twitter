@@ -20,9 +20,9 @@
   }
 
   if($userInfo) {
-    print("{'msg':'success', 'info':'". json_encode($userInfo) ."'}");
+    print("{\"msg\":\"success\",\"info\":". json_encode($userInfo) ."}");
   } else {
-    print("{'msg':'failed'}:'");
+    print("{\"msg\":\"failed\"}:\"");
   }
 
 mysqli_free_result($result);

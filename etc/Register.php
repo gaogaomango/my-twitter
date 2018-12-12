@@ -9,9 +9,9 @@
   // var_dump($result);
 
   if(!result) {
-    $output = "{ 'msg':'failed'}";
+    $output = "{\"msg\":\"failed\"}";
   } else {
-    $output = "{ 'msg': 'success'}";
+    $output = "{\"msg\":\"success\"}";
   }
 
 print($output);

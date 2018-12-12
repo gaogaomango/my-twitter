@@ -5,8 +5,6 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
-import org.json.JSONObject;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -81,16 +79,13 @@ public class HttpUtil extends AsyncTask<String, String, String> {
                 }
             }
         }
-
         return sb.toString();
     }
 
     @Override
-    protected void onProgressUpdate(String... values) {
-        for(String val : values) {
-            Log.e(TAG, "onProgressUpdate str: " + val);
-        }
-        Gson gson = new Gson();
-        mCallBackAction.onSuccess(gson.toJson(values[0]));
+    protected void onPostExecute(String s) {
+        super.onPostExecute(s);
+        Log.d(TAG, "onProgressUpdate str: " + s);
+        mCallBackAction.onSuccess(s);
     }
 }
