@@ -1,5 +1,6 @@
 package jp.co.mo.mysns;
 
+import android.Manifest;
 import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +27,19 @@ public class TweetAddAdapter extends AbstractTweetAdapter {
         attachFileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-// TODO load image attach
+                ((AbstractBaseActivity)mActivity.get()).checkPermission(new String[]{
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                }, new CallBackAction() {
+                    @Override
+                    public void onSuccess() {
+                        ((MainActivity)mActivity.get()).chooseImageFromDevice();
+                    }
+
+                    @Override
+                    public void onFailed() {
+
+                    }
+                });
             }
         });
 
@@ -49,4 +62,6 @@ public class TweetAddAdapter extends AbstractTweetAdapter {
 
         return view;
     }
+
+
 }

@@ -22,6 +22,15 @@ public class AppDataManager {
         return mInstance;
     }
 
+    public String getUserId(Context context) {
+        if(context == null) {
+            Log.e(TAG, "getUserId. context is null");
+            return "";
+        }
+        SharedPreferences pref = context.getSharedPreferences(SAVE_DATA_FILE_NAME, Context.MODE_PRIVATE);
+        return pref.getString(Parameter.PREF_KEY_USER_ID, "");
+    }
+
     public boolean saveStringData(Context context, String key, String data) {
         if(context == null) {
             Log.e(TAG, "saveStringData. context is null");

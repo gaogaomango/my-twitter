@@ -43,7 +43,6 @@ public class LoginActivity extends AbstractBaseActivity {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
 
-    private static final int RESULT_LOAD_IMAGE = 123;
 
     @BindView(R.id.editUserName)
     EditText mEditUserName;
@@ -53,8 +52,6 @@ public class LoginActivity extends AbstractBaseActivity {
     EditText mEditUserPassword;
     @BindView(R.id.imgUserIcon)
     ImageView mImgUserIcon;
-
-    private ProgressDialog mProgressDialog;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -136,11 +133,6 @@ public class LoginActivity extends AbstractBaseActivity {
 
     }
 
-    private void chooseImageFromDevice() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, RESULT_LOAD_IMAGE);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -173,21 +165,6 @@ public class LoginActivity extends AbstractBaseActivity {
         }
     }
 
-    private void showProgressDialog() {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage("loading");
-            mProgressDialog.setIndeterminate(true);
-        }
-        mProgressDialog.show();
-    }
-
-    private void hideProgressDialog() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-        }
-    }
-
     private boolean isValidInputText() {
         if (TextUtils.isEmpty(mEditUserName.getText().toString())) {
             return false;
@@ -213,9 +190,15 @@ public class LoginActivity extends AbstractBaseActivity {
         showProgressDialog();
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference sRef = storage.getReferenceFromUrl(BuildConfig.FIRE_STORAGE_URL);
-        final String imagePath = DateUtil.format(DateUtil.DATE_FORMAT_YYYMMDDHHMSS, DateUtil.now())
-                + mEditUserName.getText().toString()
-                + ".jpg";
+        String userName = null;
+        try {
+            userName = java.net.URLEncoder.encode(mEditUserName.getText().toString(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "Please check your name.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        final String imagePath = getUploadImgPath(userName);
         StorageReference imageRef = sRef.child("images/" + imagePath);
         mImgUserIcon.setDrawingCacheEnabled(true);
         mImgUserIcon.buildDrawingCache();

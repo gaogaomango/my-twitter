@@ -1,9 +1,12 @@
 package jp.co.mo.mysns;
 
 import android.Manifest;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +22,10 @@ public class AbstractBaseActivity extends AppCompatActivity {
     private static final String[] PERMISSION_LIST = {Manifest.permission.READ_EXTERNAL_STORAGE};
     private static final int REQUEST_CODE_ASK_PERMISSIONS = 123;
 
+    protected static final int RESULT_LOAD_IMAGE = 100;
+
     private CallBackAction mCallBackAction;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +82,30 @@ public class AbstractBaseActivity extends AppCompatActivity {
             default:
                 break;
         }
+    }
+
+    protected void chooseImageFromDevice() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, RESULT_LOAD_IMAGE);
+    }
+
+    protected void showProgressDialog() {
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage("loading");
+            mProgressDialog.setIndeterminate(true);
+        }
+        mProgressDialog.show();
+    }
+
+    protected void hideProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+        }
+    }
+
+    protected String getUploadImgPath(String userId) {
+        return userId + "_" + DateUtil.format(DateUtil.DATE_FORMAT_YYYMMDDHHMSS, DateUtil.now()) + ".jpg";
     }
 
 }
