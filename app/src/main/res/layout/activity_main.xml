@@ -119,6 +119,22 @@
             android:background="@color/whitebackground">
 
             <ListView
+                android:id="@+id/postTweets"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/whitebackground"
+                android:descendantFocusability="beforeDescendants"
+                android:divider="@color/whitebackground"
+                android:dividerHeight="9dp" />
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/whitebackground">
+
+            <ListView
                 android:id="@+id/listTweets"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

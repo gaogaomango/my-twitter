@@ -15,7 +15,7 @@ public class TweetNoTweetAdapter extends AbstractTweetAdapter {
 
     @Override
     protected View getViewImpl(int position, View convertView, ViewGroup parent) {
-        final TweetInfo tweetInfo = mTweetInfoList.get(position);
+//        final TweetInfo tweetInfo = mTweetInfoList.get(position);
         LayoutInflater inflater = mActivity.get().getLayoutInflater();
         View view = inflater.inflate(R.layout.tweet_msg, null);
 

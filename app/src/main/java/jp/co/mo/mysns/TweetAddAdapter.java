@@ -24,7 +24,8 @@ public class TweetAddAdapter extends AbstractTweetAdapter {
 
     @Override
     protected View getViewImpl(int position, View convertView, ViewGroup parent) {
-        final TweetInfo tweetInfo = mTweetInfoList.get(position);
+        // TODO: maybe it's not adapter. just flagment or inject layout. So TODO;
+
         LayoutInflater inflater = mActivity.get().getLayoutInflater();
         View view = inflater.inflate(R.layout.tweet_add, null);
 
@@ -90,7 +91,7 @@ public class TweetAddAdapter extends AbstractTweetAdapter {
                         if(BaseResponse.SUCCESS.equalsIgnoreCase(response.getMsg())) {
                             Toast.makeText(mActivity.get(), "post was succeed", Toast.LENGTH_LONG).show();
                             postText.setText("");
-//                        loadPost();
+                            ((MainActivity)mActivity.get()).loadTweets(0, TweetSearchType.MY_FOLLOWING.getTypeId(), null, null);
                         } else {
                             Toast.makeText(mActivity.get(), "post was failed", Toast.LENGTH_LONG).show();
                         }

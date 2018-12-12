@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -32,10 +33,12 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
@@ -49,10 +52,12 @@ public class MainActivity extends AbstractBaseActivity {
     LinearLayout mChannelInfo;
     @BindView(R.id.listTweets)
     ListView mListTweets;
+    @BindView(R.id.postTweets)
+    ListView mPostTweets;
 
-    List<TweetInfo> mTweetInfoList;
-
+    private List<TweetInfo> mTweetInfoList;
     protected String mDownloadImgName;
+    private AbstractTweetAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +72,8 @@ public class MainActivity extends AbstractBaseActivity {
             startActivity(intent);
         }
 
-        mTweetInfoList = new ArrayList<>();
-        mTweetInfoList.add(new TweetInfo(null,
+        List<TweetInfo> postList = new ArrayList<>();
+        postList.add(new TweetInfo(null,
                 null,
                 null,
                 null,
@@ -76,13 +81,13 @@ public class MainActivity extends AbstractBaseActivity {
                 null,
                 null));
 
-        // TODO: set the adapter
-
-        AbstractTweetAdapter adapter = getAdapter(TweetAdapterType.TWEET_ADD, mTweetInfoList);
-//        AbstractTweetAdapter adapter = getAdapter(TweetAdapterType.TWEET_LOADING, mTweetInfoList);
-//        AbstractTweetAdapter adapter = getAdapter(TweetAdapterType.OTHER, mTweetInfoList);
-//        AbstractTweetAdapter adapter = getAdapter(TweetAdapterType.TWEET_NOT_EXISTS, mTweetInfoList);
-        mListTweets.setAdapter(adapter);
+        // TODO change adapter to normal layout
+        AbstractTweetAdapter adapter = getAdapter(TweetAdapterType.TWEET_ADD, postList);
+        mPostTweets.setAdapter(adapter);
+        mTweetInfoList = new ArrayList<>();
+        AbstractTweetAdapter mAdapter = getAdapter(TweetAdapterType.OTHER, mTweetInfoList);
+        mListTweets.setAdapter(mAdapter);
+        loadTweets(0, TweetSearchType.MY_FOLLOWING.getTypeId(), null, null);
 
     }
 
@@ -111,6 +116,7 @@ public class MainActivity extends AbstractBaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.home:
+                loadTweets(0, TweetSearchType.MY_FOLLOWING.getTypeId(), null, null);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -224,6 +230,114 @@ public class MainActivity extends AbstractBaseActivity {
                 hideProgressDialog();
             }
         });
+    }
+
+    protected void loadTweets(int startFrom, int userOperationType, String searchQuery, String selectedUserId) {
+        StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(BuildConfig.HTTP_HOST);
+        urlBuilder.append("tweet_list.php");
+        urlBuilder.append("?user_id=");
+
+        String url = BuildConfig.HTTP_HOST + "tweet_list.php?user_id=" + AppDataManager.getInstance().getUserId(this) + "&start_from=" + startFrom + "&op=" + userOperationType;
+
+        if (TweetSearchType.SEARCH_IN.equals(TweetSearchType.getByTypeId(userOperationType))) {
+            urlBuilder.append(AppDataManager.getInstance().getUserId(this));
+            urlBuilder.append("&start_from=");
+            urlBuilder.append(startFrom);
+            urlBuilder.append("&op=");
+            urlBuilder.append(userOperationType);
+            urlBuilder.append("&query=");
+            if (!TextUtils.isEmpty(selectedUserId)) {
+                urlBuilder.append(searchQuery);
+            }
+        } else if (TweetSearchType.ONE_PERSON.equals(TweetSearchType.getByTypeId(userOperationType))) {
+            urlBuilder.append(selectedUserId);
+            urlBuilder.append("&start_from=");
+            urlBuilder.append(startFrom);
+            urlBuilder.append("&op=");
+            urlBuilder.append(userOperationType);
+
+        } else {
+            urlBuilder.append(AppDataManager.getInstance().getUserId(this));
+            urlBuilder.append("&start_from=");
+            urlBuilder.append(startFrom);
+            urlBuilder.append("&op=");
+            urlBuilder.append(userOperationType);
+        }
+
+        new HttpUtil(new HttpCallBackAction() {
+            @Override
+            public void onSuccess(Object object) {
+                Log.d(TAG, "loadTweet onSuccess");
+                if (object == null) {
+                    return;
+                }
+                Gson gson = null;
+                TweetResponse response = null;
+                try {
+                    gson = new Gson();
+                    response = gson.fromJson((String) object, TweetResponse.class);
+                } catch (JsonSyntaxException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "load tweets was failed", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                if (response == null || TextUtils.isEmpty(response.getMsg())) {
+                    return;
+                }
+
+                if (BaseResponse.SUCCESS.equalsIgnoreCase(response.getMsg())) {
+                    if (response.getInfo() == null || response.getInfo().isEmpty()) {
+                        if(mAdapter == null) {
+                            mAdapter = getAdapter(TweetAdapterType.TWEET_NOT_EXISTS, mTweetInfoList);
+                            mListTweets.setAdapter(mAdapter);
+                        }
+                    } else {
+                        mTweetInfoList.clear();
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            response.getInfo().stream().forEach(info ->
+                                    mTweetInfoList.add(new TweetInfo(info.getTweet_id(),
+                                            info.getTweet_text(),
+                                            info.getTweet_picture(),
+                                            info.getTweet_date(),
+                                            info.getUser_id(),
+                                            info.getFirst_name(),
+                                            info.getPicture_path())));
+                        } else {
+                            for (TweetInfoResponse info : response.getInfo()) {
+                                if (info != null) {
+                                    mTweetInfoList.add(new TweetInfo(info.getTweet_id(),
+                                            info.getTweet_text(),
+                                            info.getTweet_picture(),
+                                            info.getTweet_date(),
+                                            info.getUser_id(),
+                                            info.getFirst_name(),
+                                            info.getPicture_path()));
+                                }
+                            }
+                        }
+                        if(mAdapter == null) {
+                            mAdapter = getAdapter(TweetAdapterType.OTHER, mTweetInfoList);
+                            mListTweets.setAdapter(mAdapter);
+                        }
+                        mAdapter.notifyDataSetChanged();
+                    }
+
+                }
+            }
+
+            @Override
+            public void onFailed(Object object) {
+                Log.d(TAG, "loadTweet onFailed");
+            }
+        }).execute(url);
+
+        if (TweetSearchType.ONE_PERSON.equals(TweetSearchType.getByTypeId(userOperationType))) {
+            mChannelInfo.setVisibility(View.VISIBLE);
+        } else {
+            mChannelInfo.setVisibility(View.GONE);
+        }
     }
 
 }

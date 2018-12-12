@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
 public class TweetItemAdapter extends AbstractTweetAdapter {
@@ -38,7 +40,10 @@ public class TweetItemAdapter extends AbstractTweetAdapter {
         txtTweetDate.setText(tweetInfo.getTweetDate());
 
         ImageView tweetPicture = view.findViewById(R.id.tweetPicture);
+        Picasso.get().load(tweetInfo.getTweetPicture()).into(tweetPicture);
+
         ImageView picturePath = view.findViewById(R.id.picturePath);
+        Picasso.get().load(tweetInfo.getPicturePath()).into(picturePath);
 
         return view;
     }

@@ -6,31 +6,33 @@
 
 // TODO: SQL injection
 if($_GET['op'] == 1) {
-  $query = "select * from user_tweets where user_id in (select following_user_id from following where user_id=". $_GET['user_id'] .") or user_id=". $_GET['user_id'] ." order by tweet_date DESC LIMIT 20 OFFSET ". $_GET['start_form'].";";
+  $query = "select * from user_tweets where user_id in (select following_user_id from following where user_id=". $_GET['user_id'] .") or user_id=". $_GET['user_id'] ." order by tweet_date DESC LIMIT 20 OFFSET ". $_GET['start_from'].";";
 
 } elseif($_GET['op'] == 2) {
-  $query = "select * from user_tweets where user_id= ". $_GET['user_id'] ." ORDER BY tweet_date DESC LIMIT 20 OFFSET ". $_GET['start_form'].";";
+  $query = "select * from user_tweets where user_id= ". $_GET['user_id'] ." ORDER BY tweet_date DESC LIMIT 20 OFFSET ". $_GET['start_from'].";";
 
 } elseif($_GET['op'] == 3) {
-  $query = "select * from tweets where tweet_text like '%". $_GET['query'] ."%' LIMIT 20 OFFSET ". $_GET['start_form'].";";
+  $query = "select * from tweets where tweet_text like '%". $_GET['query'] ."%' LIMIT 20 OFFSET ". $_GET['start_from'].";";
 } 
 
 
-  var_dump($query);
+  // var_dump($query);
 
   $result = mysqli_query($connect, $query);
-  var_dump($result);
+  // var_dump($result);
+  if(! $result)
+{ die("Error in query");}
 
   $tweetInfo = array();
   while($row=mysqli_fetch_assoc($result)) {
     $tweetInfo[] = $row;
-    break; // to be save;
   }
 
   if($tweetInfo) {
     print("{\"msg\":\"success\",\"info\":". json_encode($tweetInfo) ."}");
   } else {
-    print("{\"msg\":\"failed\"}:\"");
+    print("{\"msg\":\"failed\",\"info\":". json_encode($tweetInfo) ."}");
+
   }
 
 mysqli_free_result($result);
