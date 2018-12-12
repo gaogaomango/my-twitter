@@ -2,12 +2,17 @@ package jp.co.mo.mysns;
 
 import android.Manifest;
 import android.app.Activity;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 public class TweetAddAdapter extends AbstractTweetAdapter {
@@ -49,12 +54,53 @@ public class TweetAddAdapter extends AbstractTweetAdapter {
         postBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                String tweet = "";
-//                try {
-//                    java.net.URLEncoder.encode(postText.getText().toString(), "UTF-8");
-//                } catch (UnsupportedEncodingException e) {
-//                    e.printStackTrace();
-//                }
+                String tweet = "";
+                try {
+                    if(!TextUtils.isEmpty(postText.getText().toString())) {
+                        tweet = java.net.URLEncoder.encode(postText.getText().toString(), "UTF-8");
+                    }
+                    if(!TextUtils.isEmpty(((MainActivity)mActivity.get()).mDownloadImgName)) {
+                        ((MainActivity)mActivity.get()).mDownloadImgName = java.net.URLEncoder.encode(((MainActivity)mActivity.get()).mDownloadImgName, "UTF-8");
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+
+                StringBuilder urlBuilder = new StringBuilder();
+                urlBuilder.append(BuildConfig.HTTP_HOST);
+                urlBuilder.append("tweet_add.php");
+                urlBuilder.append("?user_id=");
+                urlBuilder.append(AppDataManager.getInstance().getUserId(mActivity.get()));
+                urlBuilder.append("&tweet_text=");
+                urlBuilder.append(tweet);
+                urlBuilder.append("&tweet_picture=");
+                urlBuilder.append(((MainActivity)mActivity.get()).mDownloadImgName);
+
+                new HttpUtil(new HttpCallBackAction() {
+                    @Override
+                    public void onSuccess(Object object) {
+
+                        Gson gson = new Gson();
+                        BaseResponse response = gson.fromJson((String) object, BaseResponse.class);
+
+                        if(response == null) {
+                            return;
+                        }
+
+                        if(BaseResponse.SUCCESS.equalsIgnoreCase(response.getMsg())) {
+                            Toast.makeText(mActivity.get(), "post was succeed", Toast.LENGTH_LONG).show();
+                            postText.setText("");
+//                        loadPost();
+                        } else {
+                            Toast.makeText(mActivity.get(), "post was failed", Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailed(Object object) {
+                        Toast.makeText(mActivity.get(), "post was failed", Toast.LENGTH_LONG).show();
+                    }
+                }).execute(urlBuilder.toString());
 
 
             }

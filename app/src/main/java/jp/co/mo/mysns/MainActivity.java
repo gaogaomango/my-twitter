@@ -52,7 +52,7 @@ public class MainActivity extends AbstractBaseActivity {
 
     List<TweetInfo> mTweetInfoList;
 
-    private String mDownloadImgName;
+    protected String mDownloadImgName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
