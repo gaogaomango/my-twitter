@@ -123,13 +123,11 @@ public class LoginActivity extends AbstractBaseActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInAnonymously:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-//                            updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInAnonymously:failure", task.getException());
                             Toast.makeText(getApplicationContext(), "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
-//                            updateUI(null);
                         }
 
                         // ...
@@ -207,7 +205,6 @@ public class LoginActivity extends AbstractBaseActivity {
     @OnClick(R.id.btnLogin)
     public void onClickLoginBtn() {
         Log.d(TAG, "onClickLoginBtn");
-        // TODO: validation;
         if (!isValidInputText()) {
             Toast.makeText(getApplicationContext(), "Please check your information.", Toast.LENGTH_LONG).show();
             return;
@@ -257,20 +254,12 @@ public class LoginActivity extends AbstractBaseActivity {
                 Log.d(TAG, "UploadTask continueWithTask onComplete");
 
                 if (task.isSuccessful()) {
-                    Uri downloadUri = task.getResult();
-                    String downloadUrl = downloadUri.getEncodedPath();
                     String name = "";
                     try {
-
-//                    name = java.net.URLEncoder.encode(mEditUserName.getText().toString(), StandardCharsets.UTF_8.name()))
                         name = java.net.URLEncoder.encode(mEditUserName.getText().toString(), "UTF-8");
-                        downloadUrl = java.net.URLEncoder.encode(downloadUrl, "UTF-8");
-                        Log.e(TAG, "name: " + name);
-                        Log.e(TAG, "downloadUrl: " + downloadUrl);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
-
 
                     StringBuilder urlBuilder = new StringBuilder();
                     urlBuilder.append(BuildConfig.HTTP_HOST);
@@ -282,9 +271,7 @@ public class LoginActivity extends AbstractBaseActivity {
                     urlBuilder.append("&password=");
                     urlBuilder.append(mEditUserPassword.getText().toString());
                     urlBuilder.append("&picture_path=");
-                    // encodesしたスラッシュが先頭かどうか。
-                    downloadUrl = Pattern.compile("^%2F").matcher(downloadUrl).find() ? downloadUrl : "%2F" + downloadUrl;
-                    urlBuilder.append(BuildConfig.HTTP_FIREBASE_HOST + downloadUrl);
+                    urlBuilder.append("images%2F" + imagePath);
 
                     new HttpUtil(new HttpCallBackAction() {
                         @Override
