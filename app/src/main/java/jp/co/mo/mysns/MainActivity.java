@@ -19,9 +19,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
@@ -35,6 +37,8 @@ import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+import org.w3c.dom.Text;
+
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -43,6 +47,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AbstractBaseActivity {
 
@@ -54,10 +59,13 @@ public class MainActivity extends AbstractBaseActivity {
     ListView mListTweets;
     @BindView(R.id.postTweets)
     ListView mPostTweets;
+    @BindView(R.id.btnFollow)
+    Button mBtnFollow;
 
     private List<TweetInfo> mTweetInfoList;
     protected String mDownloadImgName;
     private AbstractTweetAdapter mAdapter;
+    private String mSelectedUserId = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +108,12 @@ public class MainActivity extends AbstractBaseActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                try {
+                    String searchQuery = java.net.URLEncoder.encode(query, "UTF-8");
+                    loadTweets(0, TweetSearchType.SEARCH_IN.getTypeId(), searchQuery, null);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
                 return false;
             }
 
@@ -238,18 +252,18 @@ public class MainActivity extends AbstractBaseActivity {
         urlBuilder.append("tweet_list.php");
         urlBuilder.append("?user_id=");
 
-        String url = BuildConfig.HTTP_HOST + "tweet_list.php?user_id=" + AppDataManager.getInstance().getUserId(this) + "&start_from=" + startFrom + "&op=" + userOperationType;
-
         if (TweetSearchType.SEARCH_IN.equals(TweetSearchType.getByTypeId(userOperationType))) {
+            if (TextUtils.isEmpty(searchQuery)) {
+                Toast.makeText(getApplicationContext(), "You need to some term to search.", Toast.LENGTH_LONG).show();
+            }
+
             urlBuilder.append(AppDataManager.getInstance().getUserId(this));
             urlBuilder.append("&start_from=");
             urlBuilder.append(startFrom);
             urlBuilder.append("&op=");
             urlBuilder.append(userOperationType);
             urlBuilder.append("&query=");
-            if (!TextUtils.isEmpty(selectedUserId)) {
-                urlBuilder.append(searchQuery);
-            }
+            urlBuilder.append(searchQuery);
         } else if (TweetSearchType.ONE_PERSON.equals(TweetSearchType.getByTypeId(userOperationType))) {
             urlBuilder.append(selectedUserId);
             urlBuilder.append("&start_from=");
@@ -289,7 +303,7 @@ public class MainActivity extends AbstractBaseActivity {
 
                 if (BaseResponse.SUCCESS.equalsIgnoreCase(response.getMsg())) {
                     if (response.getInfo() == null || response.getInfo().isEmpty()) {
-                        if(mAdapter == null) {
+                        if(mAdapter == null || !(mAdapter instanceof TweetNoTweetAdapter)) {
                             mAdapter = getAdapter(TweetAdapterType.TWEET_NOT_EXISTS, mTweetInfoList);
                             mListTweets.setAdapter(mAdapter);
                         }
@@ -317,7 +331,7 @@ public class MainActivity extends AbstractBaseActivity {
                                 }
                             }
                         }
-                        if(mAdapter == null) {
+                        if(mAdapter == null || !(mAdapter instanceof TweetItemAdapter)) {
                             mAdapter = getAdapter(TweetAdapterType.OTHER, mTweetInfoList);
                             mListTweets.setAdapter(mAdapter);
                         }
@@ -331,13 +345,71 @@ public class MainActivity extends AbstractBaseActivity {
             public void onFailed(Object object) {
                 Log.d(TAG, "loadTweet onFailed");
             }
-        }).execute(url);
+        }).execute(urlBuilder.toString());
 
         if (TweetSearchType.ONE_PERSON.equals(TweetSearchType.getByTypeId(userOperationType))) {
             mChannelInfo.setVisibility(View.VISIBLE);
+            mSelectedUserId = selectedUserId;
         } else {
             mChannelInfo.setVisibility(View.GONE);
+            mSelectedUserId = "";
         }
+    }
+
+    @OnClick(R.id.btnFollow)
+    public void onClickFollowBtn(View v) {
+        if(TextUtils.isEmpty(mSelectedUserId)) {
+            return;
+        }
+        int operation;
+        String followBtnText = mBtnFollow.getText().toString();
+        if(TextUtils.isEmpty(followBtnText)) {
+           return;
+        }
+
+        if(TweetItemAdapter.FOLLOW.equals(followBtnText)) {
+            operation = 1;
+        } else if(TweetItemAdapter.UNFOLLOW.equals(followBtnText)) {
+            operation = 2;
+        } else {
+            return;
+        }
+
+        StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(BuildConfig.HTTP_HOST);
+        urlBuilder.append("user_following.php");
+        urlBuilder.append("?user_id=");
+        urlBuilder.append(AppDataManager.getInstance().getUserId(this));
+        urlBuilder.append("&following_user_id=");
+        urlBuilder.append(mSelectedUserId);
+        urlBuilder.append("&op=");
+        urlBuilder.append(operation);
+        new HttpUtil(new HttpCallBackAction() {
+            @Override
+            public void onSuccess(Object object) {
+                try {
+                    Gson gson = new Gson();
+                    IsFollowingResponse response = gson.fromJson((String) object, IsFollowingResponse.class);
+                    if(response != null && BaseResponse.SUCCESS.equalsIgnoreCase(response.getMsg())) {
+                        if(IsFollowingResponse.SUBSCRIBER.equalsIgnoreCase(response.getInfo())) {
+                            mBtnFollow.setText(TweetItemAdapter.UNFOLLOW);
+                        } else if(IsFollowingResponse.NOT_SUBSCRIBER.equalsIgnoreCase(response.getInfo())) {
+                            mBtnFollow.setText(TweetItemAdapter.FOLLOW);
+                        } else {
+                            return;
+                        }
+                    }
+                } catch (JsonSyntaxException e) {
+                    e.printStackTrace();
+                    return;
+                }
+            }
+
+            @Override
+            public void onFailed(Object object) {
+
+            }
+        }).execute(urlBuilder.toString());
     }
 
 }

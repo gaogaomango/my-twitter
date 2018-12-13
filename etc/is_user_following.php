@@ -19,9 +19,9 @@
   }
 
   if($userInfo) {
-    print("{\"msg\":\"success\",\"info\":". json_encode($userInfo) ."}");
+    print("{\"msg\":\"success\",\"info\":\"subscriber\"}");
   } else {
-    print("{\"msg\":\"success\",\"info\":". json_encode($userInfo) ."}");
+    print("{\"msg\":\"success\",\"info\":\"not subscriber\"}");
   }
 
 

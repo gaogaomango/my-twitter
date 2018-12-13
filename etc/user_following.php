@@ -1,7 +1,7 @@
 <?php
   require("DBInfo.inc");
 
-// http://0.0.0.0:8080/user_following.php?user_id=2&hollowing_user_id=1&op=1;
+// http://0.0.0.0:8080/user_following.php?user_id=2&following_user_id=1&op=1;
 // op=1 for follow, op =2 unfollow
 
 if($_GET['op'] == 1) {
@@ -20,7 +20,11 @@ if($_GET['op'] == 1) {
   if(!result) {
     print("{\"msg\":\"failed\"}");
   } else {
-    print("{\"msg\":\"success\"}");
+    if($_GET['op'] == 1) {
+      print("{\"msg\":\"success\",\"info\":\"subscriber\"}");
+    } elseif($_GET['op'] == 2) {
+      print("{\"msg\":\"success\",\"info\":\"not subscriber\"}");
+    }
   }
 
 mysqli_free_result($result);
