@@ -31,7 +31,7 @@ if($_GET['op'] == 1) {
   if($tweetInfo) {
     print("{\"msg\":\"success\",\"info\":". json_encode($tweetInfo) ."}");
   } else {
-    print("{\"msg\":\"failed\",\"info\":". json_encode($tweetInfo) ."}");
+    print("{\"msg\":\"success\",\"info\":". json_encode($tweetInfo) ."}");
 
   }
 

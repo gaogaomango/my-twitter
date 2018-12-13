@@ -188,7 +188,6 @@ public class MainActivity extends AbstractBaseActivity {
             return;
         }
         final String imagePath = getUploadImgPath(userId);
-        mDownloadImgName = "images%2F" + imagePath;
         StorageReference imageRef = sRef.child("images/" + imagePath);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -196,6 +195,7 @@ public class MainActivity extends AbstractBaseActivity {
         byte[] data = baos.toByteArray();
 
         UploadTask uploadTask = imageRef.putBytes(data);
+        Log.e(TAG, "hey!");
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
@@ -221,8 +221,8 @@ public class MainActivity extends AbstractBaseActivity {
             @Override
             public void onComplete(@NonNull Task<Uri> task) {
                 Log.d(TAG, "UploadTask continueWithTask onComplete");
-
                 if (task.isSuccessful()) {
+                    mDownloadImgName = task.getResult().toString();
                     Toast.makeText(getApplicationContext(), "img saved", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(getApplicationContext(), "img saving was failed", Toast.LENGTH_LONG).show();

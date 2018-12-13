@@ -254,14 +254,16 @@ public class LoginActivity extends AbstractBaseActivity {
                     urlBuilder.append("&password=");
                     urlBuilder.append(mEditUserPassword.getText().toString());
                     urlBuilder.append("&picture_path=");
-                    urlBuilder.append("images%2F" + imagePath);
+                    if(!TextUtils.isEmpty(task.getResult().toString())) {
+                        urlBuilder.append(task.getResult().toString());
+                    }
 
                     new HttpUtil(new HttpCallBackAction() {
                         @Override
                         public void onSuccess(Object object) {
                             Log.d(TAG, "HttpUtil onSuccess register");
                             Gson gson = new Gson();
-                            LoginUserResponse res = gson.fromJson((String)object, LoginUserResponse.class);
+                            LoginUserResponse res = gson.fromJson((String) object, LoginUserResponse.class);
 
                             if (BaseResponse.SUCCESS.equalsIgnoreCase(res.getMsg())) {
                                 Log.d(TAG, "HttpUtil onSuccess BaseResponse.SUCCESS");
